@@ -1,16 +1,18 @@
 # 環境構築
-- [u9fs](https://github.com/unofficial-mirror/u9fs)と[9pfuse](https://github.com/aperezdc/9pfuse)をビルドする。方法はそれぞれのREADMEを参照。
+以下のコマンドを実行する。
+```bash
+$ git clone --recursive https://github.com/r1ru/Java9P
+```
+devcontainerを開いて[u9fs](https://github.com/unofficial-mirror/u9fs)と[9pfuse](https://github.com/aperezdc/9pfuse)をビルドする。方法はそれぞれのREADMEを参照。
 
 # 動作確認
-以下のコマンドを実行する。
-```
-$ git clone https://github.com/r1ru/Java9P
-$ cd Java9P
+以下のコマンドをJava9Pフォルダで実行する。
+```bash
 $ mkdir server client
 $ echo "flag" > ./server/flag
-$ socat TCP4-LISTEN:1234,range=127.0.0.1/32 EXEC:"./u9fs/u9fs -a none -u `whoami` ./server"
+$ socat TCP4-LISTEN:1234,range=127.0.0.1/32 EXEC:"./third_party/u9fs/u9fs -a none -u `whoami` ./server"
 $ sudo tcpflow -i lo port 1234 # 別のターミナルで
-$ ./9pfuse/build/9pfuse 'tcp!localhost!1234' ./client # 別のターミナルで
+$ ./third_party/9pfuse/build/9pfuse 'tcp!localhost!1234' ./client # 別のターミナルで
 $ cd client
 $ ls
 ```

@@ -1,0 +1,8 @@
+{
+    "name": "Java9P Development",
+    "build": {
+       "dockerfile": "Dockerfile"
+    },
+    "runArgs": ["--privileged"],
+    "postCreateCommand": "pip3 install --user -r tools/requirements.txt"
+ }
