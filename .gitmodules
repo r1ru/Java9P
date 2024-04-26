@@ -1,0 +1,6 @@
+[submodule "third_party/u9fs"]
+	path = third_party/u9fs
+	url = https://github.com/unofficial-mirror/u9fs
+[submodule "third_party/9pfuse"]
+	path = third_party/9pfuse
+	url = https://github.com/aperezdc/9pfuse
