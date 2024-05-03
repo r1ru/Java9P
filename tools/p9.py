@@ -43,6 +43,24 @@ def u32(d):
 def u64(d):
     return struct.unpack("<q", d)[0]
 
+def p8(d):
+    return struct.pack("<b", d)
+
+def p16(d):
+    return struct.pack("<h", d)
+
+def p32(d):
+     return struct.pack("<i", d)
+
+def p64(d):
+    return struct.pack("<q", d)
+
+def pstr(d):
+    return p16(len(d)) + d
+
+def pmsg(d):
+    return p32(len(d) + 4) + d
+
 # decoders
 def decode_strings(msg, n = 1):
     strings = []
@@ -200,3 +218,8 @@ def decode_msg(msg):
             decode_Rread(msg)
         case _:
             print(msg)
+
+# encoders
+def encode_Tversion(tag, msize, version):
+    msg = p8(MessageType.TVERSION) + p16(tag) + p32(msize) + p16(len(version)) + version
+    return pmsg(msg)
