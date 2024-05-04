@@ -101,11 +101,12 @@ def decode_Tattach(msg):
     uname, = decode_strings(msg[11:])
     print(f'Tattach: tag = {tag:#x}, fid = {fid:#x}, afid = {afid:#x}, uname = {uname:s}')
 
-# TODO: aqidの意味を調べる
 def decode_Rattach(msg):
     tag = u16(msg[1:3])
-    aqid = msg[3:16]
-    print(f'Rattach: tag = {tag:#x}, aqid = {aqid}')
+    qid_type = msg[3]
+    qid_vers = u32(msg[4:8])
+    qid_path = u64(msg[8:16])
+    print(f'Rattach: tag = {tag:#x}, qid_type = {qid_type:#x}, qid_vers = {qid_vers:#x}, qid_path={qid_path:#x}')
 
 # https://man.cat-v.org/plan_9/5/stat
 def decode_Tstat(msg):
@@ -184,6 +185,11 @@ def decode_Rread(msg):
     d = msg[7:7+count]
     print(f'Rread: tag = {tag:#x}, count = {count:#x}, msg = {d}')
 
+def decode_Rerror(msg):
+    tag = u16(msg[1:3])
+    ename, = decode_strings(msg[3:])
+    print(f'Rerror: tag = {tag:#x}, ename = {ename}')
+
 def decode_msg(msg):
     msg = msg[4:] # skip size
 
@@ -216,10 +222,16 @@ def decode_msg(msg):
             decode_Rclunk(msg)
         case MessageType.RREAD:
             decode_Rread(msg)
+        case MessageType.RERROR:
+            decode_Rerror(msg)
         case _:
             print(msg)
 
 # encoders
 def encode_Tversion(tag, msize, version):
     msg = p8(MessageType.TVERSION) + p16(tag) + p32(msize) + p16(len(version)) + version
+    return pmsg(msg)
+
+def encode_Tattach(tag, fid, afid, uname, aname):
+    msg = p8(MessageType.TATTACH) + p16(tag) + p32(fid) + p32(afid) + pstr(uname) + pstr(aname)
     return pmsg(msg)

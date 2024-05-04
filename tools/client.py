@@ -14,5 +14,9 @@ def main():
     io.send(encode_Tversion(-1, 0x2000, b'9P2000'))
     decode_msg(io.recv(1024))
 
+    # attach
+    io.send(encode_Tattach(0, 0, -1, b'taro', b''))
+    decode_msg(io.recv(1024))
+
 if __name__ == '__main__':
     main()
