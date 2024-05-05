@@ -235,3 +235,7 @@ def encode_Tversion(tag, msize, version):
 def encode_Tattach(tag, fid, afid, uname, aname):
     msg = p8(MessageType.TATTACH) + p16(tag) + p32(fid) + p32(afid) + pstr(uname) + pstr(aname)
     return pmsg(msg)
+
+def encode_Tstat(tag, fid):
+    msg = p8(MessageType.TSTAT) + p16(tag) + p32(fid)
+    return pmsg(msg)

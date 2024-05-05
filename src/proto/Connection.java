@@ -17,7 +17,7 @@ public class Connection {
         this.fidSpace = new ArrayList<Fid>();
     }
     
-    public Fid registerClient(String uname, int fid, Path path) throws ProtocolException{
+    public Fid registerClient(String uname, int fid, Path path) throws ProtocolException {
         // ルートディレクトリが存在しないかディレクトリでない場合はエラー。
         if (!Files.exists(path) || !Files.isDirectory(path)) {
             throw new ProtocolException("No such file or directory");
@@ -30,5 +30,18 @@ public class Connection {
         client = new Client(uname, root);
 
         return root;
+    }
+
+    public Fid findFid(int fid) throws ProtocolException {
+        Fid ret = fidSpace.stream()
+                    .filter(v -> v.fid == fid)
+                    .findFirst()
+                    .orElse(null);
+        
+        if (ret == null) {
+            throw new ProtocolException("fid unknown or out of range");
+        }
+
+        return ret;
     }
 }

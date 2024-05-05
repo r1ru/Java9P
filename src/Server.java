@@ -7,7 +7,9 @@ import io.StreamChannel;
 import proto.Connection;
 import proto.Rerror;
 import proto.Rmessage;
+import proto.Rstat;
 import proto.Tmessage;
+import proto.Tstat;
 import proto.Tversion;
 import proto.Rversion;
 import proto.Tattach;
@@ -52,6 +54,10 @@ public class Server {
                             // 新しいクライアントを登録する。
                             Fid tree = conn.registerClient(req.uname(), req.fid(), rootPath);
                             replyMsg = new Rattach(req.tag(), tree.qid());
+                        }
+                        else if (msg instanceof Tstat req) {
+                            Fid fid = conn.findFid(req.fid());
+                            replyMsg = new Rstat(req.tag(), fid.stat());
                         }
                     }
                     catch (Exception e) {

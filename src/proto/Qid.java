@@ -8,9 +8,9 @@ public class Qid {
     public static final int SIZE = 13;
     public static final byte QTFILE = 0;
     public static final byte QTDIR = (byte)0x80;
-    private byte type;
-    private int version;
-    private long path;
+    public byte type;
+    public int version;
+    public long path;
 
     public Qid(byte type, int version, long path) {
         this.type = type;

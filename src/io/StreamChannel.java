@@ -10,6 +10,7 @@ import proto.MessageType;
 import proto.Rmessage;
 import proto.Tattach;
 import proto.Tmessage;
+import proto.Tstat;
 import proto.Tversion;
 
 public class StreamChannel {
@@ -64,6 +65,7 @@ public class StreamChannel {
         var msg = switch (msg_type) {
             case MessageType.TVERSION -> new Tversion(read16(), read32(), readString());
             case MessageType.TATTACH -> new Tattach(read16(), read32(), read32(), readString(), readString());
+            case MessageType.TSTAT -> new Tstat(read16(), read32());
             default -> null;
         };
 
