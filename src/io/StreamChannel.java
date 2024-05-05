@@ -3,7 +3,6 @@ package io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import proto.MessageType;
@@ -12,42 +11,43 @@ import proto.Tattach;
 import proto.Tmessage;
 import proto.Tstat;
 import proto.Tversion;
+import util.Blob;
 
 public class StreamChannel {
     private static final int BUF_SIZE = 4096;
     private InputStream is;
     private OutputStream os;
-    private ByteBuffer buf;
+    private Blob rbuf;
+    private Blob wbuf;
 
     public StreamChannel(InputStream is, OutputStream os) {
         this.is = is;
         this.os = os;
-        this.buf = ByteBuffer.allocate(StreamChannel.BUF_SIZE);
-        this.buf.order(ByteOrder.LITTLE_ENDIAN);
+        this.rbuf = Blob.allocate(StreamChannel.BUF_SIZE).order(ByteOrder.LITTLE_ENDIAN);
+        this.wbuf = Blob.allocate(StreamChannel.BUF_SIZE).order(ByteOrder.LITTLE_ENDIAN);
     }
 
-    // wrappers
     public int read() throws IOException {
-        buf.position(0);
-        return is.read(buf.array());
+        rbuf.clear();
+        return is.read(rbuf.array());
     }
 
     public byte read8() {
-        return buf.get();
+        return rbuf.get();
     }
 
     public short read16() {
-        return buf.getShort();
+        return rbuf.getShort();
     }
 
     public int read32() {
-        return buf.getInt();
+        return rbuf.getInt();
     }
 
     public String readString() {
-        short len = buf.getShort();
+        short len = rbuf.getShort();
         byte[] str = new byte[len];
-        buf.get(str);
+        rbuf.get(str);
         return new String(str, StandardCharsets.UTF_8);
 
     }
@@ -58,11 +58,11 @@ public class StreamChannel {
         if (avail < 1)
             return null;
 
-        int msg_size = read32();
-        assert avail == msg_size;
-        byte msg_type = read8();
+        int msgSize = read32();
+        assert avail == msgSize;
+        byte msgType = read8();
 
-        var msg = switch (msg_type) {
+        var msg = switch (msgType) {
             case MessageType.TVERSION -> new Tversion(read16(), read32(), readString());
             case MessageType.TATTACH -> new Tattach(read16(), read32(), read32(), readString(), readString());
             case MessageType.TSTAT -> new Tstat(read16(), read32());
@@ -73,6 +73,8 @@ public class StreamChannel {
     }
 
     public void reply(Rmessage msg) throws IOException {
-        os.write(msg.raw());
+        msg.write(wbuf);
+        os.write(wbuf.array(), 0, wbuf.position());
+        wbuf.clear();
     }
 }

@@ -1,6 +1,8 @@
 package proto;
 
+import util.Blob;
+
 public interface Rmessage {
     short tag();
-    byte[] raw(); 
+    void write(Blob buf); 
 }

@@ -1,22 +1,18 @@
 package proto;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import util.Blob;
 
 public record Rstat(short tag, Stat stat) implements Rmessage {
     @Override
-    public byte[] raw() {
-        byte[] rawStat = stat.raw();
-        int len = 4 + 1 + 2 + 2 + rawStat.length;
-        ByteBuffer buf = ByteBuffer.allocate(len);
-        buf.order(ByteOrder.LITTLE_ENDIAN);
-        
-        buf.putInt(len);
+    public void write(Blob buf) {
+        int pos = buf.position();
+        buf.putInt(0);
         buf.put(MessageType.RSTAT);
         buf.putShort(tag);
-        buf.putShort((short)rawStat.length);
-        buf.put(rawStat);
-        
-        return buf.array();
+        int pos1 = buf.position();
+        buf.putShort((short)0);
+        stat.write(buf);
+        buf.putInt(pos, buf.position() - pos);
+        buf.putShort(pos1, (short)(buf.position() - pos1 - 2));
     }
 }

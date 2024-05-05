@@ -1,21 +1,15 @@
 package proto;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import util.Blob;
 
 public record Rerror(short tag, String ename) implements Rmessage {
     @Override
-    public byte[] raw() {
-        int len = 4 + 1 + 2 + 2 + ename.length();
-        ByteBuffer buf = ByteBuffer.allocate(len);
-        buf.order(ByteOrder.LITTLE_ENDIAN);
-        
-        buf.putInt(len);
+    public void write(Blob buf) {
+        int pos = buf.position();
+        buf.putInt(0);
         buf.put(MessageType.RERROR);
         buf.putShort(tag);
-        buf.putShort((short)ename.length());
-        buf.put(ename.getBytes());
-
-        return buf.array();
+        buf.putString(ename);
+        buf.putInt(pos, buf.position() - pos);
     }
 }

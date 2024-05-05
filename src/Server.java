@@ -31,8 +31,8 @@ public class Server {
         try {
             ServerSocket socket = new ServerSocket(this.port);
             try {
-                Socket new_socket = socket.accept();
-                StreamChannel ch = new StreamChannel(new_socket.getInputStream() ,new_socket.getOutputStream());
+                Socket newSocket = socket.accept();
+                StreamChannel ch = new StreamChannel(newSocket.getInputStream() ,newSocket.getOutputStream());
 
                 while (true) {
                     Tmessage msg = ch.recv();
@@ -69,7 +69,7 @@ public class Server {
                         ch.reply(replyMsg);
                     }
                 }
-                new_socket.close();
+                newSocket.close();
             }
             finally {
                 socket.close();

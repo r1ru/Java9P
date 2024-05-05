@@ -1,6 +1,6 @@
 package proto;
 
-import java.nio.ByteBuffer;
+import util.Blob;
 
 // https://github.com/brho/plan9/blob/master/nix/sys/src/cmd/unix/u9fs/plan9.h#L155
 public class Qid {
@@ -18,11 +18,9 @@ public class Qid {
         this.path = path;
     }
 
-    public byte[] raw() {
-        ByteBuffer buf = ByteBuffer.allocate(Qid.SIZE);
+    public void write(Blob buf) {
         buf.put(type);
         buf.putInt(version);
         buf.putLong(path);
-        return buf.array();
     }
 }

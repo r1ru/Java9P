@@ -1,20 +1,15 @@
 package proto;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import util.Blob;
 
 public record Rattach(short tag, Qid qid) implements Rmessage {
     @Override
-    public byte[] raw() {
-        int len = 4 + 1 + 2 + Qid.SIZE;
-        ByteBuffer buf = ByteBuffer.allocate(len);
-        buf.order(ByteOrder.LITTLE_ENDIAN);
-        
-        buf.putInt(len);
+    public void write(Blob buf) {
+        int pos = buf.position();
+        buf.putInt(0);
         buf.put(MessageType.RATTACH);
         buf.putShort(tag);
-        buf.put(qid.raw());
-
-        return buf.array();
+        qid.write(buf);
+        buf.putInt(pos, buf.position() - pos);
     }
 }
