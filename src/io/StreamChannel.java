@@ -9,6 +9,7 @@ import proto.MessageType;
 import proto.Rmessage;
 import proto.Tattach;
 import proto.Tmessage;
+import proto.Topen;
 import proto.Tstat;
 import proto.Tversion;
 import proto.Twalk;
@@ -75,6 +76,7 @@ public class StreamChannel {
             case MessageType.TVERSION -> new Tversion(read16(), read32(), readString());
             case MessageType.TATTACH -> new Tattach(read16(), read32(), read32(), readString(), readString());
             case MessageType.TWALK -> new Twalk(read16(), read32(), read32(), readStrings());
+            case MessageType.TOPEN -> new Topen(read16(), read32(), read8());
             case MessageType.TSTAT -> new Tstat(read16(), read32());
             default -> null;
         };

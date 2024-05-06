@@ -81,6 +81,10 @@ public class Blob {
     public void clear() {
         buf.clear();
     }
+    
+    public void flip() {
+        buf.flip();
+    }
 
     public byte[] array() {
         return buf.array();

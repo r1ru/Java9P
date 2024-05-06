@@ -1,14 +1,19 @@
 package proto;
 
 import java.io.IOException;
+import java.nio.ByteOrder;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import util.Blob;
 
 public class Fid {
     public int fid;
     public Path path;
+    private boolean isOpen = false;
+    private Blob buf;
 
     public Fid(int fid, Path path) {
         this.fid = fid;
@@ -40,6 +45,28 @@ public class Fid {
             "taro",
             ""
         );
+    }
+
+    public void open(byte mode) throws ProtocolException {
+        if (!Files.isDirectory(path)) {
+            throw new ProtocolException("Not yet implemented");  
+        }
+        // openできるのは最大1クライアントまで
+        if (isOpen) {
+            throw new ProtocolException("bad use of fid");
+        }
+
+        // ディレクトリの場合、バッファにstatを読み込んでおく。
+        buf = Blob.allocate(4096).order(ByteOrder.LITTLE_ENDIAN);
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
+            for (Path p: stream) {
+                new Fid(-1, p).stat().write(buf);
+            }
+        } catch (IOException e) {
+            throw new ProtocolException(e.getMessage(), e);
+        }
+        buf.flip();
+        isOpen = true;
     }
 
     public Qid qid() throws ProtocolException {

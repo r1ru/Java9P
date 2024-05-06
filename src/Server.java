@@ -11,6 +11,7 @@ import proto.Fid;
 import proto.Qid;
 import proto.Rerror;
 import proto.Rmessage;
+import proto.Ropen;
 import proto.Rstat;
 import proto.Tmessage;
 import proto.Tstat;
@@ -20,6 +21,7 @@ import proto.Rversion;
 import proto.Rwalk;
 import proto.Tattach;
 import proto.Rattach;
+import proto.Topen;
 
 
 public class Server {
@@ -73,12 +75,15 @@ public class Server {
                                 }
                                 qids.add(Qid.of(newPath));
                             }
-
                             if (req.fid() != req.newfid()) {
                                 conn.addFid(new Fid(req.newfid(), newPath));
                             }
-                            
                             replyMsg = new Rwalk(req.tag(), qids);
+                        }
+                        else if (msg instanceof Topen req) {
+                            Fid fid = conn.findFid(req.fid());
+                            fid.open(req.mode());
+                            replyMsg = new Ropen(req.tag(), fid.qid(), 0);
                         }
                         else if (msg instanceof Tstat req) {
                             Fid fid = conn.findFid(req.fid());
