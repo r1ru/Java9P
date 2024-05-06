@@ -11,6 +11,7 @@ import proto.Tattach;
 import proto.Tmessage;
 import proto.Tstat;
 import proto.Tversion;
+import proto.Twalk;
 import util.Blob;
 
 public class StreamChannel {
@@ -49,7 +50,15 @@ public class StreamChannel {
         byte[] str = new byte[len];
         rbuf.get(str);
         return new String(str, StandardCharsets.UTF_8);
+    }
 
+    public String[] readStrings() {
+        short n = read16();
+        String [] a = new String[n];
+        for (short i = 0; i < n; i++) {
+            a[i] = readString();
+        }
+        return a;
     }
 
     public Tmessage recv() throws IOException {
@@ -65,6 +74,7 @@ public class StreamChannel {
         var msg = switch (msgType) {
             case MessageType.TVERSION -> new Tversion(read16(), read32(), readString());
             case MessageType.TATTACH -> new Tattach(read16(), read32(), read32(), readString(), readString());
+            case MessageType.TWALK -> new Twalk(read16(), read32(), read32(), readStrings());
             case MessageType.TSTAT -> new Tstat(read16(), read32());
             default -> null;
         };

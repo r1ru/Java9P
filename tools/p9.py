@@ -236,6 +236,12 @@ def encode_Tattach(tag, fid, afid, uname, aname):
     msg = p8(MessageType.TATTACH) + p16(tag) + p32(fid) + p32(afid) + pstr(uname) + pstr(aname)
     return pmsg(msg)
 
+def encode_Twalk(tag, fid, newfid, wname):
+    msg = p8(MessageType.TWALK) + p16(tag) + p32(fid) + p32(newfid) + p16(len(wname))
+    for s in wname:
+        msg += pstr(s)
+    return pmsg(msg)
+
 def encode_Tstat(tag, fid):
     msg = p8(MessageType.TSTAT) + p16(tag) + p32(fid)
     return pmsg(msg)

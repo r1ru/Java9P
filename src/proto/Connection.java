@@ -44,4 +44,8 @@ public class Connection {
 
         return ret;
     }
+
+    public void addFid(Fid fid) {
+        fidSpace.add(fid);
+    }
 }

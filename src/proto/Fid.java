@@ -8,7 +8,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 public class Fid {
     public int fid;
-    private Path path;
+    public Path path;
 
     public Fid(int fid, Path path) {
         this.fid = fid;
@@ -23,16 +23,15 @@ public class Fid {
             throw new ProtocolException(e.getMessage(), e);
         }
 
-        byte ty = attr.isDirectory() ? Qid.QTDIR : Qid.QTFILE;
-        long p = attr.fileKey() != null ? attr.fileKey().hashCode() : path.hashCode();
+        Qid qid = Qid.of(path, attr);
         // https://github.com/brho/plan9/blob/master/nix/sys/src/cmd/unix/u9fs/plan9.h#L163
         // https://man.cat-v.org/plan_9/5/intro
-        int mode = (int)ty << 24;
+        int mode = (int)qid.type << 24;
         mode |= 0b110110110;
 
         // TODO: mode, uid, gid, muidの部分を直す。
         return new Stat(
-            (short)0, (short)0, new Qid(ty, 1, p) , mode, 
+            (short)0, (short)0, qid , mode, 
             (int)(attr.lastAccessTime().toMillis() / 1000),
             (int)(attr.lastModifiedTime().toMillis() / 1000),
             attr.size(),

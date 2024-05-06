@@ -22,5 +22,9 @@ def main():
     io.send(encode_Tstat(0, 0))
     decode_msg(io.recv(1024))
 
+    # walk
+    io.send(encode_Twalk(0, 0, 1, []))
+    decode_msg(io.recv(1024))
+
 if __name__ == '__main__':
     main()

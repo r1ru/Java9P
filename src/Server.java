@@ -1,19 +1,24 @@
+import java.net.ProtocolException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import io.StreamChannel;
-
 import proto.Connection;
+import proto.Fid;
+import proto.Qid;
 import proto.Rerror;
 import proto.Rmessage;
 import proto.Rstat;
 import proto.Tmessage;
 import proto.Tstat;
 import proto.Tversion;
+import proto.Twalk;
 import proto.Rversion;
+import proto.Rwalk;
 import proto.Tattach;
-import proto.Fid;
 import proto.Rattach;
 
 
@@ -54,6 +59,26 @@ public class Server {
                             // 新しいクライアントを登録する。
                             Fid tree = conn.registerClient(req.uname(), req.fid(), rootPath);
                             replyMsg = new Rattach(req.tag(), tree.qid());
+                        }
+                        else if (msg instanceof Twalk req) {
+                            Fid fid = conn.findFid(req.fid());
+                            ArrayList<Qid> qids = new ArrayList<Qid>();
+                            // TODO: エラー処理を仕様(https://man.cat-v.org/plan_9/5/walk)に合わせる。
+                            Path newPath = fid.path;
+                            for (String s : req.wnames()) {
+                                newPath = newPath.resolve(s).normalize();
+                                // 存在しない場合はエラー
+                                if (!Files.exists(newPath)) {
+                                    throw new ProtocolException("No such file or directory");
+                                }
+                                qids.add(Qid.of(newPath));
+                            }
+
+                            if (req.fid() != req.newfid()) {
+                                conn.addFid(new Fid(req.newfid(), newPath));
+                            }
+                            
+                            replyMsg = new Rwalk(req.tag(), qids);
                         }
                         else if (msg instanceof Tstat req) {
                             Fid fid = conn.findFid(req.fid());
