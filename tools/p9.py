@@ -246,6 +246,10 @@ def encode_Topen(tag, fid, mode):
     msg = p8(MessageType.TOPEN) + p16(tag) + p32(fid) + p8(mode)
     return pmsg(msg)
 
+def encode_Tread(tag, fid, offset, count):
+    msg = p8(MessageType.TREAD) + p16(tag) + p32(fid) + p64(offset) + p32(count)
+    return pmsg(msg)
+
 def encode_Tstat(tag, fid):
     msg = p8(MessageType.TSTAT) + p16(tag) + p32(fid)
     return pmsg(msg)

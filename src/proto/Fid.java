@@ -69,6 +69,30 @@ public class Fid {
         isOpen = true;
     }
 
+    public Blob read(long offset, int count) throws ProtocolException {
+        // offsetは0か、現在の値と等しくなる必要がある
+        if (offset == 0) {
+            buf.position(0); 
+        }
+        if (offset != buf.position()) {
+            throw new ProtocolException("bad offset in directory read");
+        }
+
+        Blob data = Blob.allocate(count).order(ByteOrder.LITTLE_ENDIAN);
+        
+        // BufferOverflowExceptionに対応するため、dataの容量だけ読み込む
+        if (buf.remaining() <= count) {
+            data.put(buf);
+        } else {
+            int oldLimit = buf.limit();
+            buf.limit(buf.position() + count);
+            data.put(buf);
+            buf.limit(oldLimit);
+        }
+        
+        return data;
+    }
+
     public Qid qid() throws ProtocolException {
         return this.stat().qid();
     }

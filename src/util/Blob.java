@@ -21,6 +21,38 @@ public class Blob {
         return buf.position();
     }
 
+    public void position(int newPos) {
+        buf.position(newPos);
+    }
+
+    public int limit() {
+        return buf.limit();
+    }
+
+    public void limit(int newLimit) {
+        buf.limit(newLimit);
+    }
+
+    public boolean hasRemaining() {
+        return buf.hasRemaining();
+    }
+
+    public int remaining() {
+        return buf.remaining();
+    }
+
+    public void clear() {
+        buf.clear();
+    }
+    
+    public void flip() {
+        buf.flip();
+    }
+    
+    public byte[] array() {
+        return buf.array();
+    }
+
     public byte get() {
         return buf.get();
     }
@@ -37,6 +69,10 @@ public class Blob {
         return buf.getInt();
     }
 
+    public long getLong() {
+        return buf.getLong();
+    }
+
     public String getString() {
         short len = buf.getShort();
         byte[] str = new byte[len];
@@ -50,6 +86,10 @@ public class Blob {
 
     public void put(byte[] b) {
         buf.put(b);
+    }
+
+    public void put(Blob b) {
+        buf.put(b.buf);
     }
 
     public void putShort(short v) {
@@ -76,17 +116,5 @@ public class Blob {
         short len = (short)s.length();
         putShort(len);
         buf.put(s.getBytes());
-    }
-
-    public void clear() {
-        buf.clear();
-    }
-    
-    public void flip() {
-        buf.flip();
-    }
-
-    public byte[] array() {
-        return buf.array();
     }
 }

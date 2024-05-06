@@ -12,6 +12,7 @@ import proto.Qid;
 import proto.Rerror;
 import proto.Rmessage;
 import proto.Ropen;
+import proto.Rread;
 import proto.Rstat;
 import proto.Tmessage;
 import proto.Tstat;
@@ -22,6 +23,7 @@ import proto.Rwalk;
 import proto.Tattach;
 import proto.Rattach;
 import proto.Topen;
+import proto.Tread;
 
 
 public class Server {
@@ -84,6 +86,10 @@ public class Server {
                             Fid fid = conn.findFid(req.fid());
                             fid.open(req.mode());
                             replyMsg = new Ropen(req.tag(), fid.qid(), 0);
+                        }
+                        else if (msg instanceof Tread req) {
+                            Fid fid = conn.findFid(req.fid());
+                            replyMsg = new Rread(req.tag(), fid.read(req.offset(), req.count()));
                         }
                         else if (msg instanceof Tstat req) {
                             Fid fid = conn.findFid(req.fid());
