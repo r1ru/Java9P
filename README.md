@@ -11,6 +11,7 @@ devcontainerを開いて[u9fs](https://github.com/unofficial-mirror/u9fs)と[9pf
 $ mkdir server client
 $ echo "flag" > ./server/flag
 $ socat TCP4-LISTEN:1234,range=127.0.0.1/32 EXEC:"./third_party/u9fs/u9fs -a none -u `whoami` ./server"
+$ java Server 1234 ../server # u9fsではなく実装したサーバーを使う場合は上の代わりにこれをsrcディレクトリで実行する
 $ sudo tcpflow -i lo port 1234 # 別のターミナルで
 $ ./third_party/9pfuse/build/9pfuse 'tcp!localhost!1234' ./client # 別のターミナルで
 $ cd client
