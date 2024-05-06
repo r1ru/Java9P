@@ -45,6 +45,12 @@ public class Connection {
         return ret;
     }
 
+    public void removeFid(int fid) throws ProtocolException {
+        Fid victim = findFid(fid);
+        victim.close();
+        fidSpace.remove(victim);
+    }
+
     public void addFid(Fid fid) {
         fidSpace.add(fid);
     }

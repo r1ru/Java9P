@@ -34,6 +34,9 @@ def main():
     io.send(encode_Tread(0, 1, 0, 0x1fe8))
     decode_msg(io.recv(1024))
 
+    # clunk
+    io.send(encode_Tclunk(0, 1))
+    decode_msg(io.recv(1024))
     
 if __name__ == '__main__':
     main()

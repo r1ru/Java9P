@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import proto.MessageType;
 import proto.Rmessage;
 import proto.Tattach;
+import proto.Tclunk;
 import proto.Tmessage;
 import proto.Topen;
 import proto.Tstat;
@@ -83,6 +84,7 @@ public class StreamChannel {
             case MessageType.TWALK -> new Twalk(read16(), read32(), read32(), readStrings());
             case MessageType.TOPEN -> new Topen(read16(), read32(), read8());
             case MessageType.TREAD -> new Tread(read16(), read32(), read64(), read32());
+            case MessageType.TCLUNK -> new Tclunk(read16(), read32());
             case MessageType.TSTAT -> new Tstat(read16(), read32());
             default -> null;
         };

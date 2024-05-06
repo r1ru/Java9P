@@ -21,7 +21,9 @@ import proto.Twalk;
 import proto.Rversion;
 import proto.Rwalk;
 import proto.Tattach;
+import proto.Tclunk;
 import proto.Rattach;
+import proto.Rclunk;
 import proto.Topen;
 import proto.Tread;
 
@@ -90,6 +92,10 @@ public class Server {
                         else if (msg instanceof Tread req) {
                             Fid fid = conn.findFid(req.fid());
                             replyMsg = new Rread(req.tag(), fid.read(req.offset(), req.count()));
+                        }
+                        else if (msg instanceof Tclunk req) {
+                            conn.removeFid(req.fid());
+                            replyMsg = new Rclunk(req.tag());
                         }
                         else if (msg instanceof Tstat req) {
                             Fid fid = conn.findFid(req.fid());

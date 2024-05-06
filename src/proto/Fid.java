@@ -93,6 +93,10 @@ public class Fid {
         return data;
     }
 
+    public void close() {
+        buf = null;
+    }
+
     public Qid qid() throws ProtocolException {
         return this.stat().qid();
     }
