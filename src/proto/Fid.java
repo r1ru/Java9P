@@ -20,6 +20,7 @@ public class Fid {
         this.path = path;
     }
 
+    // TODO: createメソッドを実装する。
     public Stat stat() throws ProtocolException {
         BasicFileAttributes attr;
         try {

@@ -22,6 +22,7 @@ import proto.Rversion;
 import proto.Rwalk;
 import proto.Tattach;
 import proto.Tclunk;
+import proto.Tcreate;
 import proto.Rattach;
 import proto.Rclunk;
 import proto.Topen;
@@ -88,6 +89,11 @@ public class Server {
                             Fid fid = conn.findFid(req.fid());
                             fid.open(req.mode());
                             replyMsg = new Ropen(req.tag(), fid.qid(), 0);
+                        }
+                        else if (msg instanceof Tcreate req) {
+                            // TODO: Tcreateの処理をして、Rcreateを返す。
+                            System.out.println("Tcreate!!");
+                            replyMsg = new Rerror(req.tag(), "dummy");
                         }
                         else if (msg instanceof Tread req) {
                             Fid fid = conn.findFid(req.fid());

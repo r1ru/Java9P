@@ -15,6 +15,7 @@ import proto.Tstat;
 import proto.Tversion;
 import proto.Twalk;
 import proto.Tread;
+import proto.Tcreate;
 import util.Blob;
 
 public class StreamChannel {
@@ -83,6 +84,7 @@ public class StreamChannel {
             case MessageType.TATTACH -> new Tattach(read16(), read32(), read32(), readString(), readString());
             case MessageType.TWALK -> new Twalk(read16(), read32(), read32(), readStrings());
             case MessageType.TOPEN -> new Topen(read16(), read32(), read8());
+            case MessageType.TCREATE -> new Tcreate(read16(), read32(), readString(), read32(), read8());
             case MessageType.TREAD -> new Tread(read16(), read32(), read64(), read32());
             case MessageType.TCLUNK -> new Tclunk(read16(), read32());
             case MessageType.TSTAT -> new Tstat(read16(), read32());

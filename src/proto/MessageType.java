@@ -10,6 +10,8 @@ public final class MessageType {
     public static final byte RWALK      = 111;
     public static final byte TOPEN      = 112;
     public static final byte ROPEN      = 113;
+    public static final byte TCREATE    = 114;
+    public static final byte RCREATE    = 115;
     public static final byte TREAD      = 116;
     public static final byte RREAD      = 117;
     public static final byte TCLUNK     = 120;
