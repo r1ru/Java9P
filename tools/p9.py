@@ -161,6 +161,12 @@ def decode_Ropen(msg):
     iounit = u32(msg[16:20])
     print(f'Ropen: tag = {tag:#x}, qid = {qid}, iounit = {iounit:#x}')
 
+def decode_Rcreate(msg):
+    tag = u16(msg[1:3])
+    qid = decode_qids(msg[3:16])
+    iouunit = u32(msg[16:20])
+    print(f'Rcreate: tag = {tag:#x}, qid = {qid}, inuunit = {iouunit:#x}')
+
 # https://man.cat-v.org/plan_9/5/clunk
 def decode_Tclunk(msg):
     tag = u16(msg[1:3])
@@ -185,10 +191,19 @@ def decode_Rread(msg):
     d = msg[7:7+count]
     print(f'Rread: tag = {tag:#x}, count = {count:#x}, msg = {d}')
 
+def decode_Twrite(msg):
+    tag = u16(msg[1:3])
+    fid = u32(msg[3:7])
+    offset = u64(msg[7:15])
+    count = u32(msg[15:19])
+    d = msg[19:19+count]
+    print(f'Twrite: tag = {tag:#x}, fid = {fid:#x}, offset = {offset:#x}, count = {count:#x}, msg = {d}')
+
 def decode_Rerror(msg):
     tag = u16(msg[1:3])
     ename, = decode_strings(msg[3:])
     print(f'Rerror: tag = {tag:#x}, ename = {ename}')
+
 
 def decode_msg(msg):
     msg = msg[4:] # skip size
@@ -208,6 +223,8 @@ def decode_msg(msg):
             decode_Tclunk(msg)
         case MessageType.TREAD:
             decode_Tread(msg)
+        case MessageType.TWRITE:
+            decode_Twrite(msg)
         case MessageType.RVERSION:
             decode_Rversion(msg)
         case MessageType.RATTACH:
@@ -224,6 +241,8 @@ def decode_msg(msg):
             decode_Rread(msg)
         case MessageType.RERROR:
             decode_Rerror(msg)
+        case MessageType.RCREATE:
+            decode_Rcreate(msg)
         case _:
             print(msg)
 
