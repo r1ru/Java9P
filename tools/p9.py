@@ -70,7 +70,7 @@ def decode_strings(msg, n = 1):
         p = p + 2
         strings.append(msg[p:p+l].decode())
         p = p + l
-    return strings
+    return strings, p
 
 def decode_qids(msg, n = 1):
     qids = []
@@ -84,13 +84,13 @@ def decode_qids(msg, n = 1):
 def decode_Tversion(msg):
     tag = u16(msg[1:3])
     msize = u32(msg[3:7])
-    version, = decode_strings(msg[7:])
+    (version,), _ = decode_strings(msg[7:])
     print(f'Tversion: tag = {tag:#x}, msize = {msize:#x}, version = {version:s}')
 
 def decode_Rversion(msg):
     tag = u16(msg[1:3])
     msize = u32(msg[3:7])
-    version, = decode_strings(msg[7:])
+    (version,), _ = decode_strings(msg[7:])
     print(f'Rversion: tag = {tag:#x}, msize = {msize:#x}, version = {version:s}')
 
 # https://man.cat-v.org/plan_9/5/attach
@@ -98,7 +98,7 @@ def decode_Tattach(msg):
     tag = u16(msg[1:3])
     fid = u32(msg[3:7])
     afid = u32(msg[7:11])
-    uname, = decode_strings(msg[11:])
+    (uname,), _ = decode_strings(msg[11:])
     print(f'Tattach: tag = {tag:#x}, fid = {fid:#x}, afid = {afid:#x}, uname = {uname:s}')
 
 def decode_Rattach(msg):
@@ -127,7 +127,7 @@ def decode_Rstat(msg):
     atime = u32(msg[30:34])
     mtime = u32(msg[34:38])
     length = u64(msg[38:46])
-    name, uid, gid, muid = decode_strings(msg[46:], 4)
+    (name, uid, gid, muid), _ = decode_strings(msg[46:], 4)
     print(f'''Rstat: tag = {tag:#x}, n = {n:#x} size = {size: #x}, type = {t1pe:#x}, dev = {dev:#x}, 
           qid_type = {qid_type}, qid_vers = {qid_vers:#x}, qid_path={qid_path:#x}
           mode = {mode:#x}, atime = {atime: #x}, mtime = {mtime:#x}, length = {length:#x}
@@ -139,7 +139,7 @@ def decode_Twalk(msg):
     fid = u32(msg[3:7])
     newfid = u32(msg[7:11])
     nwname = u16(msg[11:13])
-    wname = decode_strings(msg[13:], nwname)
+    wname, _ = decode_strings(msg[13:], nwname)
     print(f'Twalk: tag = {tag:#x}, fid = {fid:#x}, newfid = {newfid:#x}, wname = {wname}')
 
 def decode_Rwalk(msg):
@@ -160,6 +160,14 @@ def decode_Ropen(msg):
     qid = decode_qids(msg[3:])
     iounit = u32(msg[16:20])
     print(f'Ropen: tag = {tag:#x}, qid = {qid}, iounit = {iounit:#x}')
+
+def decode_Tcreate(msg):
+    tag = u16(msg[1:3])
+    fid = u32(msg[3:7])
+    (name, ), l = decode_strings(msg[7:])
+    perm = u32(msg[7+l:7+l+4])
+    mode = msg[7+l+4]
+    print(f'Tcreate: tag = {tag:#x}, fid = {fid:#x}, name = {name}, perm = {perm:#x}, mode = {mode:#x}')
 
 def decode_Rcreate(msg):
     tag = u16(msg[1:3])
@@ -199,11 +207,15 @@ def decode_Twrite(msg):
     d = msg[19:19+count]
     print(f'Twrite: tag = {tag:#x}, fid = {fid:#x}, offset = {offset:#x}, count = {count:#x}, msg = {d}')
 
+def decode_Rwrite(msg):
+    tag = u16(msg[1:3])
+    count = u32(msg[3:7])
+    print(f'Rwrite: tag = {tag:#x}, count = {count:#x}')
+
 def decode_Rerror(msg):
     tag = u16(msg[1:3])
-    ename, = decode_strings(msg[3:])
+    (ename,), _ = decode_strings(msg[3:])
     print(f'Rerror: tag = {tag:#x}, ename = {ename}')
-
 
 def decode_msg(msg):
     msg = msg[4:] # skip size
@@ -225,6 +237,8 @@ def decode_msg(msg):
             decode_Tread(msg)
         case MessageType.TWRITE:
             decode_Twrite(msg)
+        case MessageType.RWRITE:
+            decode_Rwrite(msg)
         case MessageType.RVERSION:
             decode_Rversion(msg)
         case MessageType.RATTACH:
@@ -241,6 +255,8 @@ def decode_msg(msg):
             decode_Rread(msg)
         case MessageType.RERROR:
             decode_Rerror(msg)
+        case MessageType.TCREATE:
+            decode_Tcreate(msg)
         case MessageType.RCREATE:
             decode_Rcreate(msg)
         case _:
