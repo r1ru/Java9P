@@ -1,6 +1,7 @@
 import java.net.ProtocolException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -12,7 +13,9 @@ import proto.Qid;
 import proto.Rerror;
 import proto.Rmessage;
 import proto.Ropen;
+import proto.Rcreate;
 import proto.Rread;
+import proto.Rwrite;
 import proto.Rstat;
 import proto.Tmessage;
 import proto.Tstat;
@@ -27,6 +30,7 @@ import proto.Rattach;
 import proto.Rclunk;
 import proto.Topen;
 import proto.Tread;
+import proto.Twrite;
 
 
 public class Server {
@@ -92,13 +96,27 @@ public class Server {
                         }
                         else if (msg instanceof Tcreate req) {
                             // TODO: Tcreateの処理をして、Rcreateを返す。
-                            System.out.println("Tcreate!!");
-                            replyMsg = new Rerror(req.tag(), "dummy");
+                            Fid fid = conn.findFid(req.fid());
+                            Path newPath = fid.path.resolve(req.name()).normalize();
+                            if (Files.exists(newPath)) {
+                                throw new ProtocolException("File already exists"); 
+                            } else {       
+                                fid.create(newPath);
+                                Fid newfid = new Fid(req.fid(), newPath); //ここあってるかわからん
+                                conn.addFid(newfid);
+                                replyMsg = new Rcreate(req.tag(), newfid.qid(), 0);
+                            }
                         }
                         else if (msg instanceof Tread req) {
                             Fid fid = conn.findFid(req.fid());
                             replyMsg = new Rread(req.tag(), fid.read(req.offset(), req.count()));
                         }
+                        else if (msg instanceof Twrite req) {
+                            Fid fid = conn.findFid(req.fid());
+                            int bytesWritten = fid.write(req.offset(), req.data());
+                            replyMsg = new Rwrite(req.tag(), bytesWritten);
+                        }
+
                         else if (msg instanceof Tclunk req) {
                             conn.removeFid(req.fid());
                             replyMsg = new Rclunk(req.tag());

@@ -1,6 +1,7 @@
 package proto;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -92,6 +93,36 @@ public class Fid {
         }
         
         return data;
+    }
+
+    public void create (Path filePath) throws ProtocolException {
+        try {
+            //ファイルを作成
+            Files.createFile(filePath); 
+            this.path = filePath;
+        } catch (IOException e) {
+            throw new ProtocolException("Failed to create file: " + e.getMessage(), e);
+        }
+    }
+
+    public int write (long offset, String data) throws ProtocolException {
+        try {
+            byte[] dataBytes = data.getBytes();
+            byte[] fileData = Files.readAllBytes(path);
+            int newLength = (int) Math.max(offset + dataBytes.length, fileData.length);
+            byte[] newData = new byte[newLength];
+
+            // 既存のデータを新しい配列にコピー
+            System.arraycopy(fileData, 0, newData, 0, (int) offset);
+            // 新しいデータをオフセット位置にコピー
+            System.arraycopy(dataBytes, 0, newData, (int) offset, dataBytes.length);
+            // ファイルに書き戻す
+            Files.write(path, newData);
+            // 書き込んだバイト数を返す
+            return dataBytes.length;
+        } catch (IOException e) {
+            throw new ProtocolException("Failed to write file: " + e.getMessage(), e);
+        }
     }
 
     public void close() {
