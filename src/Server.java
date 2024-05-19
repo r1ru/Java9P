@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.net.ProtocolException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -31,6 +32,8 @@ import proto.Rclunk;
 import proto.Topen;
 import proto.Tread;
 import proto.Twrite;
+import proto.Tremove;
+import proto.Rremove;
 
 
 public class Server {
@@ -116,7 +119,12 @@ public class Server {
                             int bytesWritten = fid.write(req.offset(), req.data());
                             replyMsg = new Rwrite(req.tag(), bytesWritten);
                         }
-
+                        else if (msg instanceof Tremove req) {
+                            Fid fid = conn.findFid(req.fid());
+                            Files.delete(fid.path);
+                            conn.removeFid(req.fid());
+                            replyMsg = new Rremove(req.tag());
+                        }
                         else if (msg instanceof Tclunk req) {
                             conn.removeFid(req.fid());
                             replyMsg = new Rclunk(req.tag());

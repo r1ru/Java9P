@@ -18,6 +18,8 @@ public final class MessageType {
     public static final byte RWRITE     = 119;
     public static final byte TCLUNK     = 120;
     public static final byte RCLUNK     = 121;
+    public static final byte TREMOVE    = 122;
+    public static final byte RREMOVE    = 123;
     public static final byte TSTAT      = 124;
     public static final byte RSTAT      = 125;
 }

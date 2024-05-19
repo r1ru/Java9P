@@ -212,6 +212,12 @@ def decode_Rwrite(msg):
     count = u32(msg[3:7])
     print(f'Rwrite: tag = {tag:#x}, count = {count:#x}')
 
+# https://man.cat-v.org/plan_9/5/remove
+def decode_Tremove(msg):
+    tag = u16(msg[1:3])
+    fid = u32(msg[3:7])
+    print(f'Tremove: tag = {tag:#x}, fid = {fid:#x}')
+
 def decode_Rerror(msg):
     tag = u16(msg[1:3])
     (ename,), _ = decode_strings(msg[3:])
