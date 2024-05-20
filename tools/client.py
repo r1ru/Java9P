@@ -34,6 +34,14 @@ def main():
     io.send(encode_Tread(0, 1, 0, 0x1fe8))
     decode_msg(io.recv(1024))
 
+    #create
+    io.send(encode_Tcreate(0, 1, b'a', 0x1a4, 1))
+    decode_msg(io.recv(1024))
+
+    #delete
+    io.send(encode_Tremove(0, 2))
+    decode_msg(io.recv(1024))
+
     # clunk
     io.send(encode_Tclunk(0, 1))
     decode_msg(io.recv(1024))
