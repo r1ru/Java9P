@@ -100,15 +100,14 @@ public class Server {
                         else if (msg instanceof Tcreate req) {
                             // TODO: Tcreateの処理をして、Rcreateを返す。
                             Fid fid = conn.findFid(req.fid());
-                            Path newPath = fid.path.resolve(req.name()).normalize();
-                            if (Files.exists(newPath)) {
-                                throw new ProtocolException("File already exists"); 
-                            } else {       
-                                fid.create(newPath);
-                                Fid newfid = new Fid(req.fid(), newPath); //ここあってるかわからん
-                                conn.addFid(newfid);
-                                replyMsg = new Rcreate(req.tag(), newfid.qid(), 0);
+                             if (fid == null) {
+                                // Fidが存在しない場合エラー処理
+                                continue;
                             }
+                            Path newPath = fid.path.resolve(req.name()).normalize();
+                            Fid newFid = fid.create(req.fid(), newPath);
+                            conn.addFid(newFid);
+                            replyMsg = new Rcreate(req.tag(), newFid.qid(), 0);
                         }
                         else if (msg instanceof Tread req) {
                             Fid fid = conn.findFid(req.fid());

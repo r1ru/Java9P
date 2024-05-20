@@ -95,11 +95,12 @@ public class Fid {
         return data;
     }
 
-    public void create (Path filePath) throws ProtocolException {
+    public Fid create (int fid, Path filePath) throws ProtocolException {
         try {
             //ファイルを作成
             Files.createFile(filePath); 
-            this.path = filePath;
+            //新しいFidを作成して返す
+            return new Fid(fid, filePath);
         } catch (IOException e) {
             throw new ProtocolException("Failed to create file: " + e.getMessage(), e);
         }
