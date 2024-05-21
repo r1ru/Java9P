@@ -98,12 +98,7 @@ public class Server {
                             replyMsg = new Ropen(req.tag(), fid.qid(), 0);
                         }
                         else if (msg instanceof Tcreate req) {
-                            // TODO: Tcreateの処理をして、Rcreateを返す。
                             Fid fid = conn.findFid(req.fid());
-                             if (fid == null) {
-                                // Fidが存在しない場合エラー処理
-                                continue;
-                            }
                             Path newPath = fid.path.resolve(req.name()).normalize();
                             Fid newFid = fid.create(req.fid(), newPath);
                             conn.addFid(newFid);
@@ -120,7 +115,7 @@ public class Server {
                         }
                         else if (msg instanceof Tremove req) {
                             Fid fid = conn.findFid(req.fid());
-                            Files.delete(fid.path);
+                            fid.remove(fid.path);
                             conn.removeFid(req.fid());
                             replyMsg = new Rremove(req.tag());
                         }

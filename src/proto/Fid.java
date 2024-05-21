@@ -126,6 +126,15 @@ public class Fid {
         }
     }
 
+    public void remove(Path filePath) throws ProtocolException {
+        try {
+            // ファイルを消去
+            Files.delete(filePath);
+        } catch (IOException e) {
+            throw new ProtocolException("Failed to remove file: " + e.getMessage(), e);
+        } 
+    }
+
     public void close() {
         buf = null;
     }

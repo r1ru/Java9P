@@ -34,11 +34,15 @@ def main():
     io.send(encode_Tread(0, 1, 0, 0x1fe8))
     decode_msg(io.recv(1024))
 
-    #create
-    io.send(encode_Tcreate(0, 1, b'a', 0x1a4, 1))
+    # create (fidを1から0に修正)
+    io.send(encode_Tcreate(0, 0, b'a', 0x1a4, 1))
     decode_msg(io.recv(1024))
 
-    #delete
+    # walk (Tremove確認のためにこれを追加)
+    io.send(encode_Twalk(0, 0, 2, [b'a']))
+    decode_msg(io.recv(1024))
+
+    # delete
     io.send(encode_Tremove(0, 2))
     decode_msg(io.recv(1024))
 
