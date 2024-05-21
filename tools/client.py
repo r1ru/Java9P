@@ -30,13 +30,34 @@ def main():
     io.send(encode_Topen(0, 1, 0))
     decode_msg(io.recv(1024))
 
-    # read
+    # read(下のTwalkのエラーを直すため追加)
     io.send(encode_Tread(0, 1, 0, 0x1fe8))
     decode_msg(io.recv(1024))
 
-    # create (fidを1から0に修正)
-    io.send(encode_Tcreate(0, 0, b'a', 0x1a4, 1))
+    # clunk(下のTwalkのエラーを直すため追加)
+    io.send(encode_Tclunk(0, 1))
     decode_msg(io.recv(1024))
+
+    # walk
+    io.send(encode_Twalk(0, 0, 1, []))
+    decode_msg(io.recv(1024))
+
+    # create
+    io.send(encode_Tcreate(0, 1, b'a', 0x1a4, 1))
+    decode_msg(io.recv(1024))
+
+    #この先2つはTwriteを確認するために追加 client.pyが動かなくなったので一旦コメントアウトしてる
+    # stat(追加)
+    #io.send(encode_Tstat(0, 1))
+    #decode_msg(io.recv(1024))
+
+    # walk(追加)
+    #io.send(encode_Twalk(0, 0, 2, [b'a']))
+    #decode_msg(io.recv(1024))
+
+    # write
+    #io.send(encode_Twrite(0, 1, 0, 2, b'a\n'))
+    #decode_msg(io.recv(1024))
 
     # walk (Tremove確認のためにこれを追加)
     io.send(encode_Twalk(0, 0, 2, [b'a']))
