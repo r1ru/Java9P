@@ -9,7 +9,7 @@ def main():
     
     io = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     io.connect((sys.argv[1], int(sys.argv[2], 10)))
-
+    
     # version
     io.send(encode_Tversion(-1, 0x2000, b'9P2000'))
     decode_msg(io.recv(1024))
@@ -46,23 +46,24 @@ def main():
     io.send(encode_Tcreate(0, 1, b'a', 0x1a4, 1))
     decode_msg(io.recv(1024))
 
-    #この先2つはTwriteを確認するために追加 client.pyが動かなくなったので一旦コメントアウトしてる
+    # この先2つはTwriteを確認するために追加
+    # echo a > Aを実行したことを想定
     # stat(追加)
-    #io.send(encode_Tstat(0, 1))
-    #decode_msg(io.recv(1024))
+    io.send(encode_Tstat(0, 1))
+    decode_msg(io.recv(1024))
 
     # walk(追加)
-    #io.send(encode_Twalk(0, 0, 2, [b'a']))
-    #decode_msg(io.recv(1024))
-
+    io.send(encode_Twalk(0, 0, 2, [b'A']))
+    decode_msg(io.recv(1024))
+    
     # write
-    #io.send(encode_Twrite(0, 1, 0, 2, b'a\n'))
-    #decode_msg(io.recv(1024))
-
+    io.send(encode_Twrite(0, 1, 0, 2, b'a\n'))
+    decode_msg(io.recv(1024))
+    
     # walk (Tremove確認のためにこれを追加)
     io.send(encode_Twalk(0, 0, 2, [b'a']))
     decode_msg(io.recv(1024))
-
+    
     # delete
     io.send(encode_Tremove(0, 2))
     decode_msg(io.recv(1024))
