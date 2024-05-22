@@ -315,6 +315,6 @@ def encode_Tstat(tag, fid):
     msg = p8(MessageType.TSTAT) + p16(tag) + p32(fid)
     return pmsg(msg)
 
-def encode_Twrite(tag, fid, offset, count, data):
+def encode_Twrite(tag, fid, offset, data):
   msg = p8(MessageType.TWRITE) + p16(tag) + p32(fid) + p64(offset) + p32(len(data)) + data
   return pmsg(msg)
