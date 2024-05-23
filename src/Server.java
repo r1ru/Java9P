@@ -100,7 +100,9 @@ public class Server {
                         else if (msg instanceof Tcreate req) {
                             Fid fid = conn.findFid(req.fid());
                             Path newPath = fid.path.resolve(req.name()).normalize();
-                            Fid newFid = fid.create(req.fid(), newPath);
+                            Fid newFid = fid.create(req.fid(), newPath, req.mode());
+                            // serverのfidをコネクションから削除
+                            conn.removeFid(req.fid());
                             conn.addFid(newFid);
                             replyMsg = new Rcreate(req.tag(), newFid.qid(), 0);
                         }
@@ -110,8 +112,10 @@ public class Server {
                         }
                         else if (msg instanceof Twrite req) {
                             Fid fid = conn.findFid(req.fid());
-                            int bytesWritten = fid.write(req.offset(), req.data());
-                            replyMsg = new Rwrite(req.tag(), bytesWritten);
+                            byte[] bytes = req.data().getBytes(); // Stringからバイト配列へ
+                            ByteBuffer buffer = ByteBuffer.wrap(bytes);
+                            fid.write(buffer, req.offset());
+                            replyMsg = new Rwrite(req.tag(), req.data().length());
                         }
                         else if (msg instanceof Tremove req) {
                             Fid fid = conn.findFid(req.fid());

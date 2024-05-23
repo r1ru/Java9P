@@ -3,11 +3,18 @@ package proto;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import util.Blob;
 
 public class Fid {
@@ -15,13 +22,13 @@ public class Fid {
     public Path path;
     private boolean isOpen = false;
     private Blob buf;
+    private FileChannel channel;
 
     public Fid(int fid, Path path) {
         this.fid = fid;
         this.path = path;
     }
 
-    // TODO: createメソッドを実装する。
     public Stat stat() throws ProtocolException {
         BasicFileAttributes attr;
         try {
@@ -50,25 +57,52 @@ public class Fid {
     }
 
     public void open(byte mode) throws ProtocolException {
-        if (!Files.isDirectory(path)) {
-            throw new ProtocolException("Not yet implemented");  
-        }
         // openできるのは最大1クライアントまで
         if (isOpen) {
             throw new ProtocolException("bad use of fid");
         }
 
-        // ディレクトリの場合、バッファにstatを読み込んでおく。
-        buf = Blob.allocate(4096).order(ByteOrder.LITTLE_ENDIAN);
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
-            for (Path p: stream) {
-                new Fid(-1, p).stat().write(buf);
+        // ファイルだった場合に、channelを初期化
+        if (!Files.isDirectory(path)) {
+            Set<OpenOption> options = new HashSet<>();
+
+            // modeごとにoptionを設定
+            if (mode == 0x0) { // OREAD
+                options.add(StandardOpenOption.READ);
+            } else if (mode == 0x1) { // OWRITE
+                options.add(StandardOpenOption.WRITE);
+            } else if (mode == 0x2) { // ORDWR
+                options.add(StandardOpenOption.READ);
+                options.add(StandardOpenOption.WRITE);
+            } else if (mode == 0x3) { // OEXEC
+                options.add(StandardOpenOption.READ);
+            } else if (mode == 0x10) { // OTRUNC
+                options.add(StandardOpenOption.TRUNCATE_EXISTING);
+            } else if (mode == 0x40) { // ORCLOSE
+                options.add(StandardOpenOption.DELETE_ON_CLOSE);
             }
-        } catch (IOException e) {
-            throw new ProtocolException(e.getMessage(), e);
+
+            try {
+                // channelを初期化
+                channel = FileChannel.open(path, options);
+                isOpen = true;
+            } catch (IOException e) {
+                throw new ProtocolException(e.getMessage(), e);
+            }
+
+        } else {
+            // ディレクトリの場合、バッファにstatを読み込んでおく。
+            buf = Blob.allocate(4096).order(ByteOrder.LITTLE_ENDIAN);
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
+                for (Path p: stream) {
+                    new Fid(-1, p).stat().write(buf);
+                }
+            } catch (IOException e) {
+                throw new ProtocolException(e.getMessage(), e);
+            }
+            buf.flip();
+            isOpen = true;
         }
-        buf.flip();
-        isOpen = true;
     }
 
     public Blob read(long offset, int count) throws ProtocolException {
@@ -95,34 +129,33 @@ public class Fid {
         return data;
     }
 
-    public Fid create (int fid, Path filePath) throws ProtocolException {
+    public Fid create (int fid, Path filePath, byte mode) throws ProtocolException {
         try {
             //ファイルを作成
             Files.createFile(filePath); 
-            //新しいFidを作成して返す
+            // openメソッドを呼び出す
+            this.open(mode);
+            // 新しいFidを作成して返す
             return new Fid(fid, filePath);
         } catch (IOException e) {
             throw new ProtocolException("Failed to create file: " + e.getMessage(), e);
         }
     }
 
-    public int write (long offset, String data) throws ProtocolException {
-        try {
-            byte[] dataBytes = data.getBytes();
-            byte[] fileData = Files.readAllBytes(path);
-            int newLength = (int) Math.max(offset + dataBytes.length, fileData.length);
-            byte[] newData = new byte[newLength];
+    public void write (ByteBuffer data, long offset) throws ProtocolException {
+        if (channel == null || !isOpen) {
+            throw new ProtocolException("FileChannel is not initialized or file is a directory and cannot be written.");
+        }
 
-            // 既存のデータを新しい配列にコピー
-            System.arraycopy(fileData, 0, newData, 0, (int) offset);
-            // 新しいデータをオフセット位置にコピー
-            System.arraycopy(dataBytes, 0, newData, (int) offset, dataBytes.length);
-            // ファイルに書き戻す
-            Files.write(path, newData);
-            // 書き込んだバイト数を返す
-            return dataBytes.length;
+        if (Files.isDirectory(path)) {
+            throw new ProtocolException("Directories may not be written.");
+        }
+
+        try {
+            channel.position(offset);
+            channel.write(data);
         } catch (IOException e) {
-            throw new ProtocolException("Failed to write file: " + e.getMessage(), e);
+            throw new ProtocolException(e.getMessage(), e);
         }
     }
 
