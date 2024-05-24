@@ -144,17 +144,19 @@ public class Fid {
         }
     }
 
-    public void write (ByteBuffer data, long offset) throws ProtocolException {
+    public int write (ByteBuffer data, long offset) throws ProtocolException {
         if (!isOpen) {
             throw new ProtocolException("Bad use of fid");
         }
 
         try {
             channel.position(offset);
-            channel.write(data);
+            return channel.write(data);
         } catch (IOException e) {
             throw new ProtocolException(e.getMessage(), e);
-        }
+        } 
+
+
     }
 
     public void remove(Path filePath) throws ProtocolException {

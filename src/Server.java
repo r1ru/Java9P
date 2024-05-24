@@ -112,10 +112,8 @@ public class Server {
                         }
                         else if (msg instanceof Twrite req) {
                             Fid fid = conn.findFid(req.fid());
-                            byte[] bytes = req.data().getBytes(); // Stringからバイト配列へ
-                            ByteBuffer buffer = ByteBuffer.wrap(bytes);
-                            fid.write(buffer, req.offset());
-                            replyMsg = new Rwrite(req.tag(), req.data().length());
+                            int byte_length = fid.write(req.data(), req.offset());
+                            replyMsg = new Rwrite(req.tag(), byte_length);
                         }
                         else if (msg instanceof Tremove req) {
                             Fid fid = conn.findFid(req.fid());

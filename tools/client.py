@@ -49,12 +49,12 @@ def main():
     io.send(encode_Tcreate(0, 1, b'a', 0x1a4, 1))
     decode_msg(io.recv(1024))
     
-    # 'a'に書き込みを行う (encode_Twriteを上記のように修正した前提)
+    # 'a'に書き込みを行う
     # write
     io.send(encode_Twrite(0, 1, 0, b'a\n'))
     decode_msg(io.recv(1024))
     
-    # 'a'を削除する
+    # remove
     io.send(encode_Tremove(0, 1))
     decode_msg(io.recv(1024))
 
