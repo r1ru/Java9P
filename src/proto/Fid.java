@@ -157,10 +157,10 @@ public class Fid {
 
     }
 
-    public void remove(Path filePath) throws ProtocolException {
+    public void remove() throws ProtocolException {
         try {
             // ファイルを消去
-            Files.delete(filePath);
+            Files.delete(this.path);
         } catch (IOException e) {
             throw new ProtocolException("Failed to remove file: " + e.getMessage(), e);
         } 

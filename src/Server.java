@@ -117,7 +117,7 @@ public class Server {
                         }
                         else if (msg instanceof Tremove req) {
                             Fid fid = conn.findFid(req.fid());
-                            fid.remove(fid.path);
+                            fid.remove();
                             conn.removeFid(req.fid());
                             replyMsg = new Rremove(req.tag());
                         }
