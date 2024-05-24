@@ -15,13 +15,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import util.Blob;
-
 public class Fid {
     public int fid;
     public Path path;
     private boolean isOpen = false;
-    private Blob buf;
+    private ByteBuffer buf;
     private FileChannel channel = null;
 
     public Fid(int fid, Path path) {
@@ -92,7 +90,7 @@ public class Fid {
 
         } else {
             // ディレクトリの場合、バッファにstatを読み込んでおく。
-            buf = Blob.allocate(4096).order(ByteOrder.LITTLE_ENDIAN);
+            buf = ByteBuffer.allocate(4096).order(ByteOrder.LITTLE_ENDIAN);
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
                 for (Path p: stream) {
                     new Fid(-1, p).stat().write(buf);
@@ -105,7 +103,7 @@ public class Fid {
         }
     }
 
-    public Blob read(long offset, int count) throws ProtocolException {
+    public ByteBuffer read(long offset, int count) throws ProtocolException {
         // offsetは0か、現在の値と等しくなる必要がある
         if (offset == 0) {
             buf.position(0); 
@@ -114,7 +112,7 @@ public class Fid {
             throw new ProtocolException("bad offset in directory read");
         }
 
-        Blob data = Blob.allocate(count).order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer data = ByteBuffer.allocate(count).order(ByteOrder.LITTLE_ENDIAN);
         
         // BufferOverflowExceptionに対応するため、dataの容量だけ読み込む
         if (buf.remaining() <= count) {

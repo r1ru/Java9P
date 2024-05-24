@@ -19,20 +19,19 @@ import proto.Tread;
 import proto.Tcreate;
 import proto.Twrite;
 import proto.Tremove;
-import util.Blob;
 
 public class StreamChannel {
     private static final int BUF_SIZE = 4096;
     private InputStream is;
     private OutputStream os;
-    private Blob rbuf;
-    private Blob wbuf;
+    private ByteBuffer rbuf;
+    private ByteBuffer wbuf;
 
     public StreamChannel(InputStream is, OutputStream os) {
         this.is = is;
         this.os = os;
-        this.rbuf = Blob.allocate(StreamChannel.BUF_SIZE).order(ByteOrder.LITTLE_ENDIAN);
-        this.wbuf = Blob.allocate(StreamChannel.BUF_SIZE).order(ByteOrder.LITTLE_ENDIAN);
+        this.rbuf = ByteBuffer.allocate(StreamChannel.BUF_SIZE).order(ByteOrder.LITTLE_ENDIAN);
+        this.wbuf = ByteBuffer.allocate(StreamChannel.BUF_SIZE).order(ByteOrder.LITTLE_ENDIAN);
     }
 
     public int read() throws IOException {

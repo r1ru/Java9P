@@ -1,11 +1,11 @@
 package proto;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import util.Blob;
 
 // https://github.com/brho/plan9/blob/master/nix/sys/src/cmd/unix/u9fs/plan9.h#L155
 public class Qid {
@@ -40,7 +40,7 @@ public class Qid {
         return new Qid(ty, 1, p);
     }
 
-    public void write(Blob buf) {
+    public void write(ByteBuffer buf) {
         buf.put(type);
         buf.putInt(version);
         buf.putLong(path);

@@ -1,8 +1,8 @@
 package proto;
 
-import util.Blob;
+import java.nio.ByteBuffer;
 
 public interface Rmessage {
     short tag();
-    void write(Blob buf); 
+    void write(ByteBuffer buf); 
 }

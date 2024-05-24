@@ -1,10 +1,10 @@
 package proto;
 
-import util.Blob;
+import java.nio.ByteBuffer;
 
-public record Rread(short tag, Blob data) implements Rmessage {
+public record Rread(short tag, ByteBuffer data) implements Rmessage {
     @Override
-    public void write(Blob buf) {
+    public void write(ByteBuffer buf) {
         int pos = buf.position();
         buf.putInt(0);
         buf.put(MessageType.RREAD);

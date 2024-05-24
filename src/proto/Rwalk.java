@@ -1,11 +1,11 @@
 package proto;
 
+import java.nio.ByteBuffer;
 import java.util.List;
-import util.Blob;
 
 public record Rwalk(short tag, List<Qid> qids) implements Rmessage {
     @Override
-    public void write(Blob buf) {
+    public void write(ByteBuffer buf) {
         int pos = buf.position();
         buf.putInt(0);
         buf.put(MessageType.RWALK);
