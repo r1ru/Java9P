@@ -83,6 +83,8 @@ public class Fid {
             try {
                 // channelを初期化
                 channel = FileChannel.open(path, options);
+                // bufを初期化
+                buf = ByteBuffer.allocate((int) Files.size(path)).order(ByteOrder.LITTLE_ENDIAN);
                 isOpen = true;
             } catch (IOException e) {
                 throw new ProtocolException(e.getMessage(), e);
@@ -104,24 +106,42 @@ public class Fid {
     }
 
     public ByteBuffer read(long offset, int count) throws ProtocolException {
-        // offsetは0か、現在の値と等しくなる必要がある
-        if (offset == 0) {
-            buf.position(0); 
+        if (!isOpen) {
+        throw new ProtocolException("bad use of fid");
         }
-        if (offset != buf.position()) {
-            throw new ProtocolException("bad offset in directory read");
+
+        if (buf == null) {
+            throw new ProtocolException("Buffer not initialized");
         }
 
         ByteBuffer data = ByteBuffer.allocate(count).order(ByteOrder.LITTLE_ENDIAN);
-        
-        // BufferOverflowExceptionに対応するため、dataの容量だけ読み込む
-        if (buf.remaining() <= count) {
-            data.put(buf);
+
+        if (Files.isDirectory(path)) {
+            // ディレクトリを読み込む場合
+            // offsetは0か、現在の値と等しくなる必要がある
+            if (offset == 0) {
+                buf.position(0); 
+            }
+            if (offset != buf.position()) {
+                throw new ProtocolException("bad offset in directory read");
+            }
+            // BufferOverflowExceptionに対応するため、dataの容量だけ読み込む
+            if (buf.remaining() <= count) {
+                data.put(buf);
+            } else {
+                int oldLimit = buf.limit();
+                buf.limit(buf.position() + count);
+                data.put(buf);
+                buf.limit(oldLimit);
+            }
+            data.flip();
         } else {
-            int oldLimit = buf.limit();
-            buf.limit(buf.position() + count);
-            data.put(buf);
-            buf.limit(oldLimit);
+            // ファイルを読み込む場合
+            try {
+                channel.read(data, offset);
+            } catch (IOException e) {
+                throw new ProtocolException(e.getMessage(), e);
+            }
         }
         
         return data;
