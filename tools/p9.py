@@ -212,6 +212,16 @@ def decode_Rwrite(msg):
     count = u32(msg[3:7])
     print(f'Rwrite: tag = {tag:#x}, count = {count:#x}')
 
+# https://man.cat-v.org/plan_9/5/remove
+def decode_Tremove(msg):
+    tag = u16(msg[1:3])
+    fid = u32(msg[3:7])
+    print(f'Tremove: tag = {tag:#x}, fid = {fid:#x}')
+
+def decode_Rremove(msg):
+    tag = u16(msg[1:3])
+    print(f'Rremove: tag = {tag:#x}')
+
 def decode_Rerror(msg):
     tag = u16(msg[1:3])
     (ename,), _ = decode_strings(msg[3:])
@@ -237,6 +247,10 @@ def decode_msg(msg):
             decode_Tread(msg)
         case MessageType.TWRITE:
             decode_Twrite(msg)
+        case MessageType.TCREATE:
+            decode_Tcreate(msg)
+        case MessageType.TREMOVE:
+            decode_Tremove(msg)
         case MessageType.RWRITE:
             decode_Rwrite(msg)
         case MessageType.RVERSION:
@@ -255,10 +269,10 @@ def decode_msg(msg):
             decode_Rread(msg)
         case MessageType.RERROR:
             decode_Rerror(msg)
-        case MessageType.TCREATE:
-            decode_Tcreate(msg)
         case MessageType.RCREATE:
             decode_Rcreate(msg)
+        case MessageType.RREMOVE:
+            decode_Rremove(msg)
         case _:
             print(msg)
 
@@ -285,10 +299,22 @@ def encode_Tread(tag, fid, offset, count):
     msg = p8(MessageType.TREAD) + p16(tag) + p32(fid) + p64(offset) + p32(count)
     return pmsg(msg)
 
+def encode_Tcreate(tag, fid, name, perm, mode):
+    msg = p8(MessageType.TCREATE) + p16(tag) + p32(fid) + pstr(name) + p32(perm) + p8(mode)
+    return pmsg(msg)
+
 def encode_Tclunk(tag, fid):
     msg = p8(MessageType.TCLUNK) + p16(tag) + p32(fid)
+    return pmsg(msg)
+
+def encode_Tremove(tag, fid):
+    msg = p8(MessageType.TREMOVE) + p16(tag) + p32(fid)
     return pmsg(msg)
 
 def encode_Tstat(tag, fid):
     msg = p8(MessageType.TSTAT) + p16(tag) + p32(fid)
     return pmsg(msg)
+
+def encode_Twrite(tag, fid, offset, data):
+  msg = p8(MessageType.TWRITE) + p16(tag) + p32(fid) + p64(offset) + p32(len(data)) + data
+  return pmsg(msg)
