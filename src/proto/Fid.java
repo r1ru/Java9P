@@ -22,7 +22,7 @@ public class Fid {
     public Path path;
     private boolean isOpen = false;
     private Blob buf;
-    private FileChannel channel;
+    private FileChannel channel = null;
 
     public Fid(int fid, Path path) {
         this.fid = fid;
@@ -133,22 +133,20 @@ public class Fid {
         try {
             //ファイルを作成
             Files.createFile(filePath); 
+            // 新しいFidを作成
+            Fid new_fid = new Fid(fid, filePath);
             // openメソッドを呼び出す
-            this.open(mode);
-            // 新しいFidを作成して返す
-            return new Fid(fid, filePath);
+            new_fid.open(mode);
+            // 新しいFidを返す
+            return new_fid;
         } catch (IOException e) {
             throw new ProtocolException("Failed to create file: " + e.getMessage(), e);
         }
     }
 
     public void write (ByteBuffer data, long offset) throws ProtocolException {
-        if (channel == null || !isOpen) {
-            throw new ProtocolException("FileChannel is not initialized or file is a directory and cannot be written.");
-        }
-
-        if (Files.isDirectory(path)) {
-            throw new ProtocolException("Directories may not be written.");
+        if (!isOpen) {
+            throw new ProtocolException("Bad use of fid");
         }
 
         try {
