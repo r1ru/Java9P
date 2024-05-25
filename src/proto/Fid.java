@@ -83,8 +83,6 @@ public class Fid {
             try {
                 // channelを初期化
                 channel = FileChannel.open(path, options);
-                // bufを初期化
-                buf = ByteBuffer.allocate((int) Files.size(path)).order(ByteOrder.LITTLE_ENDIAN);
                 isOpen = true;
             } catch (IOException e) {
                 throw new ProtocolException(e.getMessage(), e);
@@ -110,10 +108,6 @@ public class Fid {
         throw new ProtocolException("bad use of fid");
         }
 
-        if (buf == null) {
-            throw new ProtocolException("Buffer not initialized");
-        }
-
         ByteBuffer data = ByteBuffer.allocate(count).order(ByteOrder.LITTLE_ENDIAN);
 
         if (Files.isDirectory(path)) {
@@ -134,11 +128,17 @@ public class Fid {
                 data.put(buf);
                 buf.limit(oldLimit);
             }
-            data.flip();
+
         } else {
             // ファイルを読み込む場合
             try {
-                channel.read(data, offset);
+                if (offset == 0) {
+                    channel.position(0); 
+                }
+                if (offset != channel.position()) {
+                    throw new ProtocolException("bad offset in file read");
+                }
+                channel.read(data);
             } catch (IOException e) {
                 throw new ProtocolException(e.getMessage(), e);
             }
