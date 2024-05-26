@@ -59,9 +59,19 @@ public class Fid {
         if (isOpen) {
             throw new ProtocolException("bad use of fid");
         }
-
-        // ファイルだった場合に、channelを初期化
-        if (!Files.isDirectory(path)) {
+        if (Files.isDirectory(path)) {
+             // ディレクトリの場合、バッファにstatを読み込んでおく。
+            buf = ByteBuffer.allocate(4096).order(ByteOrder.LITTLE_ENDIAN);
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
+                for (Path p: stream) {
+                    new Fid(-1, p).stat().write(buf);
+                }
+            } catch (IOException e) {
+                throw new ProtocolException(e.getMessage(), e);
+            }
+            buf.flip();
+        } else {
+             // ファイルだった場合、channelを初期化
             Set<OpenOption> options = new HashSet<>();
 
             // modeごとにoptionを設定
@@ -88,24 +98,13 @@ public class Fid {
                 throw new ProtocolException(e.getMessage(), e);
             }
 
-        } else {
-            // ディレクトリの場合、バッファにstatを読み込んでおく。
-            buf = ByteBuffer.allocate(4096).order(ByteOrder.LITTLE_ENDIAN);
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
-                for (Path p: stream) {
-                    new Fid(-1, p).stat().write(buf);
-                }
-            } catch (IOException e) {
-                throw new ProtocolException(e.getMessage(), e);
-            }
-            buf.flip();
-            isOpen = true;
         }
+        isOpen = true;
     }
 
     public ByteBuffer read(long offset, int count) throws ProtocolException {
         if (!isOpen) {
-        throw new ProtocolException("bad use of fid");
+            throw new ProtocolException("bad use of fid");
         }
 
         ByteBuffer data = ByteBuffer.allocate(count).order(ByteOrder.LITTLE_ENDIAN);
@@ -128,7 +127,6 @@ public class Fid {
                 data.put(buf);
                 buf.limit(oldLimit);
             }
-
         } else {
             // ファイルを読み込む場合
             try {
